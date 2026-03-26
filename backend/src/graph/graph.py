@@ -3,12 +3,12 @@ graph/graph.py — LangGraph pipeline wiring.
 Flow: intel → curriculum → [schedule ‖ patterns] → synthesis → renderer
 """
 from langgraph.graph import StateGraph, END
-from backend.src.graph.state import PrepState
-from backend.src.agents.intel_agent import intel_agent
-from backend.src.agents.curriculum_agent import curriculum_agent
-from backend.src.agents.schedule_agent import schedule_agent
-from backend.src.agents.pattern_agent import pattern_agent
-from backend.src.agents.renderer_agent import renderer_agent
+from src.graph.state import PrepState
+from src.agents.intel_agent import intel_agent
+from src.agents.curriculum_agent import curriculum_agent
+from src.agents.schedule_agent import schedule_agent
+from src.agents.pattern_agent import pattern_agent
+from src.agents.renderer_agent import renderer_agent
 
 
 async def synthesis_node(state: PrepState) -> PrepState:

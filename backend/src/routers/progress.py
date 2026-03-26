@@ -3,7 +3,7 @@ routers/progress.py — PATCH /progress/{session_id}, GET /progress/{session_id}
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from backend.src.db.mongo import update_progress, get_session
+from src.db.mongo import update_progress, get_session
 
 router = APIRouter(prefix="/progress", tags=["progress"])
 

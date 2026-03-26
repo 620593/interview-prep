@@ -7,10 +7,10 @@ Model: llama-3.3-70b-versatile (reasoning + web-data synthesis)
 import asyncio
 import logging
 from langchain_core.messages import HumanMessage
-from backend.src.tools.web_search import search
-from backend.src.tools.llm import get_intel_llm
-from backend.src.utils.parser import extract_json
-from backend.src.graph.state import PrepState
+from src.tools.web_search import search
+from src.tools.llm import get_intel_llm
+from src.utils.parser import extract_json
+from src.graph.state import PrepState
 
 logger = logging.getLogger(__name__)
 

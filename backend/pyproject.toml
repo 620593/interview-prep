@@ -1,5 +1,5 @@
 [project]
-name = "interview-prep-agent"
+name = "backend"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -17,9 +17,4 @@ dependencies = [
     "python-dotenv>=1.2.2",
     "tavily-python>=0.7.23",
     "uvicorn[standard]>=0.42.0",
-]
-
-[tool.uv.workspace]
-members = [
-    "backend",
 ]

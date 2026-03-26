@@ -1,14 +1,14 @@
 """
 main.py — FastAPI entry point.
-Run: uv run uvicorn backend.src.main:app --reload --port 8000
+Run: uvicorn src.main:app --reload --port 8000
 """
 import logging
 import traceback
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.src.routers.prep import router as prep_router
-from backend.src.routers.progress import router as progress_router
-from backend.src.config import settings
+from src.routers.prep import router as prep_router
+from src.routers.progress import router as progress_router
+from src.config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,7 +42,7 @@ async def startup_checks() -> None:
     # Smoke-test the Groq API key
     try:
         from langchain_core.messages import HumanMessage
-        from backend.src.tools.llm import get_llm
+        from src.tools.llm import get_llm
         llm = get_llm()
         resp = await llm.ainvoke([HumanMessage(content="Reply with OK")])
         logger.info("✅ Groq LLM reachable — reply: %s", resp.content[:40])
@@ -51,7 +51,7 @@ async def startup_checks() -> None:
 
     # Ping MongoDB — non-fatal, DB writes will surface errors on a per-request basis
     try:
-        from backend.src.db.mongo import get_db
+        from src.db.mongo import get_db
         db = get_db()
         await db.command("ping")
         logger.info("✅ MongoDB reachable at %s", settings.mongo_uri)

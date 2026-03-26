@@ -6,8 +6,16 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Resolve to <project-root>/.env regardless of CWD
-# Path: backend/src/config.py → parent = backend/src → parent = backend → parent = project root
-_ENV_FILE = Path(__file__).parent.parent.parent / ".env"
+# Supports both run commands:
+#   Old: uv run uvicorn backend.src.main:app  (CWD = project root)
+#   New: uvicorn src.main:app                 (CWD = backend/)
+#
+# config.py is at: backend/src/config.py
+#   parent        = backend/src/
+#   parent.parent = backend/
+#   parent.parent.parent = project root
+_HERE = Path(__file__).resolve()
+_ENV_FILE = str(_HERE.parent.parent.parent / ".env")
 
 
 class Settings(BaseSettings):

@@ -7,9 +7,9 @@ Intel is slimmed to key fields only to stay within free-tier TPM limits.
 import asyncio
 import logging
 from langchain_core.messages import HumanMessage
-from backend.src.tools.llm import get_curriculum_llm
-from backend.src.utils.parser import extract_json
-from backend.src.graph.state import PrepState
+from src.tools.llm import get_curriculum_llm
+from src.utils.parser import extract_json
+from src.graph.state import PrepState
 
 logger = logging.getLogger(__name__)
 

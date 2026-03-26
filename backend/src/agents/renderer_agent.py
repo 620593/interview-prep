@@ -5,7 +5,7 @@ Converts the fully assembled pipeline state into a rendered HTML tracker page.
 import uuid
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
-from backend.src.graph.state import PrepState
+from src.graph.state import PrepState
 
 _TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
 

@@ -6,8 +6,8 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
-from backend.src.graph.runner import run_prep
-from backend.src.db.mongo import save_session, get_session
+from src.graph.runner import run_prep
+from src.db.mongo import save_session, get_session
 
 router = APIRouter(prefix="/prep", tags=["prep"])
 logger = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ Agent → Model mapping (configurable via env vars in config.py):
 """
 from functools import lru_cache
 from langchain_groq import ChatGroq
-from backend.src.config import settings
+from src.config import settings
 
 
 def _make(model: str, temperature: float = 0.3, max_tokens: int = 8192) -> ChatGroq:

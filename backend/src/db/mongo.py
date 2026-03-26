@@ -5,7 +5,7 @@ The client is created lazily via get_db() so it binds to uvicorn's running event
 import logging
 from functools import lru_cache
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from backend.src.config import settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 

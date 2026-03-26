@@ -2,7 +2,7 @@
 graph/runner.py — Entry point to invoke the prep pipeline.
 """
 import re
-from backend.src.graph.state import PrepState
+from src.graph.state import PrepState
 
 
 def parse_query(query: str) -> tuple[str, str, int]:
@@ -23,7 +23,7 @@ _parse_query = parse_query
 
 async def run_prep(query: str) -> PrepState:
     # Lazy import so tests can mock LLM/search before the graph is built
-    from backend.src.graph.graph import prep_graph  # noqa: PLC0415
+    from src.graph.graph import prep_graph  # noqa: PLC0415
 
     company, role, days = parse_query(query)
     initial_state: PrepState = {
