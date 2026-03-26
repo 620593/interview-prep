@@ -8,7 +8,7 @@ FIX 13: Path(__file__).resolve() ensures the template path is absolute and
 import uuid
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
-from backend.graph.state import PrepState
+from backend.src.graph.state import PrepState
 
 # FIX 13: .resolve() makes the path absolute and symlink-safe
 _TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"

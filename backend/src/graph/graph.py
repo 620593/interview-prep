@@ -6,12 +6,12 @@ FIX 5: PrepState now carries Annotated reducers for `schedule` / `patterns` so
         parallel branch merges are safe (see graph/state.py).
 """
 from langgraph.graph import StateGraph, END
-from backend.graph.state import PrepState
-from backend.agents.intel_agent import intel_agent
-from backend.agents.curriculum_agent import curriculum_agent
-from backend.agents.schedule_agent import schedule_agent
-from backend.agents.pattern_agent import pattern_agent
-from backend.agents.renderer_agent import renderer_agent
+from backend.src.graph.state import PrepState
+from backend.src.agents.intel_agent import intel_agent
+from backend.src.agents.curriculum_agent import curriculum_agent
+from backend.src.agents.schedule_agent import schedule_agent
+from backend.src.agents.pattern_agent import pattern_agent
+from backend.src.agents.renderer_agent import renderer_agent
 
 
 async def synthesis_node(state: PrepState) -> PrepState:

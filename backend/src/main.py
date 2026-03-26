@@ -9,9 +9,9 @@ import logging
 import traceback
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers.prep import router as prep_router
-from backend.routers.progress import router as progress_router
-from backend.config import settings
+from backend.src.routers.prep import router as prep_router
+from backend.src.routers.progress import router as progress_router
+from backend.src.config import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,7 +46,7 @@ async def startup_checks() -> None:
     # 2 — Smoke-test the Groq API key with a tiny prompt
     try:
         from langchain_core.messages import HumanMessage
-        from backend.tools.llm import get_llm
+        from backend.src.tools.llm import get_llm
         llm = get_llm()
         resp = await llm.ainvoke([HumanMessage(content="Reply with OK")])
         logger.info("✅ Groq LLM reachable — reply: %s", resp.content[:40])
@@ -55,7 +55,7 @@ async def startup_checks() -> None:
 
     # 3 — Ping MongoDB (non-fatal)
     try:
-        from backend.db.mongo import get_db
+        from backend.src.db.mongo import get_db
         db = get_db()
         await db.command("ping")
         logger.info("✅ MongoDB reachable at %s", settings.mongo_uri)
@@ -69,3 +69,4 @@ async def startup_checks() -> None:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+

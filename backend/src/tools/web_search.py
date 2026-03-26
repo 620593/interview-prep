@@ -11,7 +11,7 @@ FIX 7: TavilyClient.search() is synchronous/blocking.  The public `search` corou
 import asyncio
 from functools import lru_cache
 from tavily import TavilyClient
-from backend.config import settings
+from backend.src.config import settings
 
 
 @lru_cache(maxsize=1)

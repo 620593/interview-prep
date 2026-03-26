@@ -5,11 +5,11 @@ FIX 9: After ainvoke, validate that html_output is present; raise a descriptive
         RuntimeError rather than letting the router trip over a None value.
 """
 import re
-from backend.graph.graph import prep_graph
-from backend.graph.state import PrepState
+from backend.src.graph.state import PrepState
 
 
-def _parse_query(query: str) -> tuple[str, str, int]:
+def parse_query(query: str) -> tuple[str, str, int]:
+    """Public alias — extracts (company, role, days) from a free-text query."""
     days_match = re.search(r"(\d+)\s*day", query, re.IGNORECASE)
     days = int(days_match.group(1)) if days_match else 7
     role_pattern = r"(AI Engineer|Backend Engineer|Software Engineer|SDE|Data Scientist|ML Engineer|Full Stack)"
@@ -20,8 +20,15 @@ def _parse_query(query: str) -> tuple[str, str, int]:
     return company, role, days
 
 
+# Keep old private name as an alias for internal callers
+_parse_query = parse_query
+
+
 async def run_prep(query: str) -> PrepState:
-    company, role, days = _parse_query(query)
+    # Lazy import so tests can mock LLM/search before the graph is built
+    from backend.src.graph.graph import prep_graph  # noqa: PLC0415
+
+    company, role, days = parse_query(query)
     initial_state: PrepState = {
         "query": query, "company": company, "role": role,
         "timeline_days": days, "intel": None, "curriculum": None,

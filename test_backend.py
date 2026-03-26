@@ -39,27 +39,27 @@ def test(name: str, fn: Callable[[], None]) -> None:
 print("\n── 1. Import Tests ───────────────────────────────────────────")
 
 def t_import_state():
-    from backend.graph.state import PrepState
+    from backend.src.graph.state import PrepState
     assert isinstance(PrepState.__annotations__, dict)
     assert "intel" in PrepState.__annotations__
 
 def t_import_parser():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     assert callable(extract_json)
 
 def t_import_runner():
-    from backend.graph.runner import parse_query
+    from backend.src.graph.runner import parse_query
     assert callable(parse_query)
 
 def t_import_agents():
     # Agents import LLM/search clients — mock them
-    with patch("backend.tools.llm.ChatGroq"), \
-         patch("backend.tools.web_search.TavilyClient"):
-        from backend.agents.intel_agent      import intel_agent     # noqa
-        from backend.agents.curriculum_agent import curriculum_agent # noqa
-        from backend.agents.schedule_agent   import schedule_agent   # noqa
-        from backend.agents.pattern_agent    import pattern_agent    # noqa
-        from backend.agents.renderer_agent   import renderer_agent   # noqa
+    with patch("backend.src.tools.llm.ChatGroq"), \
+         patch("backend.src.tools.web_search.TavilyClient"):
+        from backend.src.agents.intel_agent      import intel_agent     # noqa
+        from backend.src.agents.curriculum_agent import curriculum_agent # noqa
+        from backend.src.agents.schedule_agent   import schedule_agent   # noqa
+        from backend.src.agents.pattern_agent    import pattern_agent    # noqa
+        from backend.src.agents.renderer_agent   import renderer_agent   # noqa
         assert all([
             callable(intel_agent),
             callable(curriculum_agent),
@@ -77,7 +77,7 @@ test("All 5 agents import", t_import_agents)
 print("\n── 2. PrepState Shape ────────────────────────────────────────")
 
 def t_state_keys():
-    from backend.graph.state import PrepState
+    from backend.src.graph.state import PrepState
     required = {"query","company","role","timeline_days",
                 "intel","curriculum","schedule","patterns",
                 "html_output","session_id","user_progress"}
@@ -90,33 +90,33 @@ test("PrepState has all 11 required keys", t_state_keys)
 print("\n── 3. Parser Tests ───────────────────────────────────────────")
 
 def t_parser_plain_json():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     result = extract_json('{"company": "Gridlex", "rounds": []}')
     assert isinstance(result, dict)
     result = cast(dict[str, Any], result)
     assert result["company"] == "Gridlex"
 
 def t_parser_fenced_json():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     result = extract_json('```json\n{"company": "Gridlex"}\n```')
     assert isinstance(result, dict)
     result = cast(dict[str, Any], result)
     assert result["company"] == "Gridlex"
 
 def t_parser_json_in_prose():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     result = extract_json('Here is the result:\n{"company": "Gridlex"}\nDone.')
     assert isinstance(result, dict)
     result = cast(dict[str, Any], result)
     assert result["company"] == "Gridlex"
 
 def t_parser_list():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     result = extract_json('```json\n[1, 2, 3]\n```')
     assert result == [1, 2, 3]
 
 def t_parser_raises_on_garbage():
-    from backend.utils.parser import extract_json
+    from backend.src.utils.parser import extract_json
     try:
         extract_json("no json here at all")
         assert False, "Should have raised"
@@ -133,19 +133,19 @@ test("Raises ValueError on garbage input", t_parser_raises_on_garbage)
 print("\n── 4. Query Parser Tests ─────────────────────────────────────")
 
 def t_query_full():
-    from backend.graph.runner import parse_query
+    from backend.src.graph.runner import parse_query
     c, r, d = parse_query("Prepare me for Gridlex AI Engineer interview in 7 days")
     assert c == "Gridlex", f"company={c}"
     assert r == "AI Engineer", f"role={r}"
     assert d == 7, f"days={d}"
 
 def t_query_default_days():
-    from backend.graph.runner import parse_query
+    from backend.src.graph.runner import parse_query
     _, _, d = parse_query("Prepare me for Amazon interview")
     assert d == 7  # default
 
 def t_query_sde():
-    from backend.graph.runner import parse_query
+    from backend.src.graph.runner import parse_query
     c, r, d = parse_query("Get me ready for Zepto SDE interview in 14 days")
     assert c == "Zepto"
     assert r == "SDE"
@@ -159,16 +159,16 @@ test("SDE role + 14 days", t_query_sde)
 print("\n── 5. Graph Structure Tests ──────────────────────────────────")
 
 def t_graph_builds():
-    with patch("backend.tools.llm.ChatGroq"), \
-         patch("backend.tools.web_search.TavilyClient"):
-        from backend.graph.graph import build_graph
+    with patch("backend.src.tools.llm.ChatGroq"), \
+         patch("backend.src.tools.web_search.TavilyClient"):
+        from backend.src.graph.graph import build_graph
         g = build_graph()
         assert g is not None
 
 def t_graph_has_all_nodes():
-    with patch("backend.tools.llm.ChatGroq"), \
-         patch("backend.tools.web_search.TavilyClient"):
-        from backend.graph.graph import build_graph
+    with patch("backend.src.tools.llm.ChatGroq"), \
+         patch("backend.src.tools.web_search.TavilyClient"):
+        from backend.src.graph.graph import build_graph
         g = build_graph()
         # LangGraph compiled graph exposes nodes via get_graph()
         graph_repr = cast(Any, g).get_graph()

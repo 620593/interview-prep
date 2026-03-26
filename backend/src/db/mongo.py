@@ -8,7 +8,7 @@ FIX 11: AsyncIOMotorClient is created lazily via get_db() with @lru_cache so it
 import logging
 from functools import lru_cache
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-from backend.config import settings
+from backend.src.config import settings
 
 logger = logging.getLogger(__name__)
 

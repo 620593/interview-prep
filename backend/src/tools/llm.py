@@ -7,7 +7,7 @@ FIX 2: Lazy initialization via @lru_cache so ChatGroq is created on first use,
 """
 from functools import lru_cache
 from langchain_groq import ChatGroq
-from backend.config import settings
+from backend.src.config import settings
 
 
 @lru_cache(maxsize=1)
