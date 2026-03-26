@@ -1,9 +1,6 @@
 """
 main.py — FastAPI entry point.
-Run: cd interview-prep-agent && uv run uvicorn backend.main:app --reload
-
-FIX 12: @app.on_event("startup") validates all env vars and external connections
-        so config errors are caught immediately rather than on the first request.
+Run: uv run uvicorn backend.src.main:app --reload --port 8000
 """
 import logging
 import traceback
@@ -34,8 +31,7 @@ app.include_router(progress_router)
 
 @app.on_event("startup")
 async def startup_checks() -> None:
-    """FIX 12: Validate env vars, LLM reachability, and DB connectivity at startup."""
-    # 1 — Log loaded settings (mask secret values)
+    """Validate env vars, LLM reachability, and DB connectivity at startup."""
     logger.info("=== Startup configuration ===")
     logger.info("  groq_model       : %s", settings.groq_model)
     logger.info("  groq_api_key     : %s…", settings.groq_api_key[:6])
@@ -43,7 +39,7 @@ async def startup_checks() -> None:
     logger.info("  mongo_uri        : %s", settings.mongo_uri)
     logger.info("  mongo_db         : %s", settings.mongo_db)
 
-    # 2 — Smoke-test the Groq API key with a tiny prompt
+    # Smoke-test the Groq API key
     try:
         from langchain_core.messages import HumanMessage
         from backend.src.tools.llm import get_llm
@@ -53,7 +49,7 @@ async def startup_checks() -> None:
     except Exception:
         logger.error("❌ Groq LLM unreachable at startup:\n%s", traceback.format_exc())
 
-    # 3 — Ping MongoDB (non-fatal)
+    # Ping MongoDB — non-fatal, DB writes will surface errors on a per-request basis
     try:
         from backend.src.db.mongo import get_db
         db = get_db()
@@ -61,7 +57,7 @@ async def startup_checks() -> None:
         logger.info("✅ MongoDB reachable at %s", settings.mongo_uri)
     except Exception:
         logger.warning(
-            "⚠️  MongoDB unreachable at startup (non-fatal — DB writes will fail on request):\n%s",
+            "⚠️  MongoDB unreachable at startup (non-fatal):\n%s",
             traceback.format_exc(),
         )
 
@@ -69,4 +65,3 @@ async def startup_checks() -> None:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
-

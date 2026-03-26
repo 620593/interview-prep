@@ -2,16 +2,13 @@
 agents/intel_agent.py — Agent 1: Company Intel
 Searches web + extracts round structure JSON.
 
-FIX 4:  Uses get_llm() / get_search_client() lazy getters (not module-level singletons).
-FIX 6:  async def + await llm.ainvoke().
-FIX 14: Graceful fallback when Tavily returns 0 results.
-FIX 15: Retry loop (3 attempts, exponential back-off 1 / 2 / 4 s) for LLM + parse errors.
+Model: llama-3.3-70b-versatile (reasoning + web-data synthesis)
 """
 import asyncio
 import logging
 from langchain_core.messages import HumanMessage
 from backend.src.tools.web_search import search
-from backend.src.tools.llm import get_llm
+from backend.src.tools.llm import get_intel_llm
 from backend.src.utils.parser import extract_json
 from backend.src.graph.state import PrepState
 
@@ -33,11 +30,9 @@ Extract and return ONLY a JSON object:
 }}
 Return ONLY the JSON. No explanation."""
 
-# FIX 14: fallback prompt used when Tavily returns no results
 INTEL_FALLBACK_PROMPT = """You are an interview intelligence analyst.
-No live interview experience data was available for {company} ({role} role).
-Based on your training knowledge, generate a plausible and realistic interview
-structure JSON for this company and role.
+No live interview data was available for {company} ({role} role).
+Based on your training knowledge, generate a realistic interview structure JSON.
 Return ONLY a JSON object:
 {{
   "company": "{company}", "role": "{role}",
@@ -52,9 +47,8 @@ Return ONLY the JSON. No explanation."""
 
 async def intel_agent(state: PrepState) -> PrepState:
     company, role = state["company"], state["role"]
-    llm = get_llm()
+    llm = get_intel_llm()
 
-    # --- web search (FIX 6: search is now async) ---
     queries = [
         f"{company} {role} interview experience leetcode discuss",
         f"{company} coding interview questions geeksforgeeks",
@@ -72,10 +66,9 @@ async def intel_agent(state: PrepState) -> PrepState:
         except Exception as exc:
             logger.warning("intel_agent: search failed for query %r: %s", q, exc)
 
-    # FIX 14: fallback when no snippets were retrieved
     if len(snippets) == 0:
         logger.warning(
-            "intel_agent: no search results for %s/%s — using fallback knowledge prompt", company, role
+            "intel_agent: no search results for %s/%s — using fallback prompt", company, role
         )
         prompt_template = INTEL_FALLBACK_PROMPT
         raw_snippets = ""
@@ -85,7 +78,6 @@ async def intel_agent(state: PrepState) -> PrepState:
 
     prompt = prompt_template.format(company=company, role=role, snippets=raw_snippets)
 
-    # FIX 15: retry loop (3 attempts, exponential back-off)
     last_exc: Exception | None = None
     for attempt in range(1, 4):
         try:
@@ -95,7 +87,7 @@ async def intel_agent(state: PrepState) -> PrepState:
         except Exception as exc:
             last_exc = exc
             if attempt < 3:
-                wait = 2 ** (attempt - 1)  # 1s, 2s
+                wait = 2 ** (attempt - 1)
                 logger.warning("intel_agent attempt %d failed (%s); retrying in %ds", attempt, exc, wait)
                 await asyncio.sleep(wait)
 

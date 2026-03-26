@@ -23,9 +23,11 @@ export default function PlanCard({ company, role, timelineDays, htmlOutput }) {
       {/* Plan content */}
       <div className="px-6 py-6 overflow-x-auto">
         {htmlOutput ? (
-          <div
-            className="plan-content"
-            dangerouslySetInnerHTML={{ __html: htmlOutput }}
+          <iframe
+            title="Prep Tracker"
+            srcDoc={htmlOutput}
+            className="w-full min-h-[800px] border-0 rounded-lg bg-[#0f0f0f]"
+            sandbox="allow-scripts allow-same-origin"
           />
         ) : (
           <p className="text-slate-500 italic">No plan content available.</p>

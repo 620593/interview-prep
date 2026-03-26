@@ -1,9 +1,6 @@
 """
-db/mongo.py — Motor async MongoDB client + CRUD helpers.
-
-FIX 11: AsyncIOMotorClient is created lazily via get_db() with @lru_cache so it
-        binds to the *running* event loop (the one uvicorn manages) rather than
-        whatever loop was active at import time.
+db/mongo.py — Motor async MongoDB client and CRUD helpers.
+The client is created lazily via get_db() so it binds to uvicorn's running event loop.
 """
 import logging
 from functools import lru_cache
@@ -15,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @lru_cache(maxsize=1)
 def _get_client() -> AsyncIOMotorClient:
-    """Return the shared Motor client.  Created on first call."""
+    """Return the shared Motor client. Created on first call."""
     return AsyncIOMotorClient(settings.mongo_uri)
 
 
@@ -33,7 +30,7 @@ async def save_session(session_id: str, state: dict) -> None:
     await _col().update_one(
         {"session_id": session_id},
         {"$set": {
-            "session_id": session_id,
+            "session_id":    session_id,
             "company":       state.get("company"),
             "role":          state.get("role"),
             "timeline_days": state.get("timeline_days"),

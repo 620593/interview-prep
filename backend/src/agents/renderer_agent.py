@@ -1,17 +1,13 @@
 """
-agents/renderer_agent.py — Agent 5: HTML Renderer via Jinja2
-
-FIX 6:  async def (LangGraph 1.1.x calls all nodes with await).
-FIX 13: Path(__file__).resolve() ensures the template path is absolute and
-        symlink-safe, regardless of CWD.
+agents/renderer_agent.py — Agent 5: HTML Renderer via Jinja2.
+Converts the fully assembled pipeline state into a rendered HTML tracker page.
 """
 import uuid
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from backend.src.graph.state import PrepState
 
-# FIX 13: .resolve() makes the path absolute and symlink-safe
-_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+_TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent / "templates"
 
 _env = Environment(
     loader=FileSystemLoader(str(_TEMPLATES_DIR)),

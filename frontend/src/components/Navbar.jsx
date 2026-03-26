@@ -23,7 +23,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden sm:flex items-center gap-1">
+          <nav className="hidden sm:flex items-center gap-4">
             {NAV_LINKS.map(({ to, label, icon }) => {
               const active = pathname === to || (to !== '/' && pathname.startsWith(to))
               return (
@@ -41,6 +41,23 @@ export default function Navbar() {
                 </Link>
               )
             })}
+            
+            {/* User Info / Logout */}
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-700">
+              <span className="text-sm text-slate-300 truncate max-w-[120px]">
+                {localStorage.getItem('prep_user') || 'Guest'}
+              </span>
+              <button
+                onClick={() => {
+                  localStorage.removeItem('prep_user')
+                  localStorage.removeItem('prep_session_id')
+                  window.location.href = '/login'
+                }}
+                className="text-xs px-3 py-1.5 rounded-md bg-slate-800 hover:bg-red-900/50 text-slate-400 hover:text-red-300 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </nav>
 
           {/* Mobile hamburger */}

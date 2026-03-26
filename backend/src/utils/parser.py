@@ -1,9 +1,6 @@
 """
 utils/parser.py — Safe JSON extraction from LLM responses.
-LLMs often wrap JSON in ```json ... ``` — this strips that and parses.
-
-FIX 8: Replaced greedy regex (which breaks on trailing text after closing brace)
-        with a bracket-counting approach that finds the outermost JSON boundary.
+LLMs often wrap JSON in markdown fences — this strips fences and parses robustly.
 """
 import json
 import re
@@ -11,11 +8,8 @@ import re
 
 def _find_json_boundaries(text: str) -> tuple[int, int] | None:
     """
-    Scan `text` for the outermost JSON object `{...}` or array `[...]` using a
-    bracket-counting approach.  Returns (start, end+1) indices or None.
-
-    This avoids the greedy-regex pitfall where re.DOTALL matches from the first `{`
-    to the very last `}` in a string, even across multiple disjoint JSON objects.
+    Locate the outermost JSON object `{...}` or array `[...]` using bracket counting.
+    Returns (start, end+1) indices or None if not found.
     """
     for opener, closer in [('{', '}'), ('[', ']')]:
         start = text.find(opener)
@@ -48,7 +42,6 @@ def _find_json_boundaries(text: str) -> tuple[int, int] | None:
 
 def extract_json(text: str) -> dict | list:
     """Extract and parse the first top-level JSON object or array from `text`."""
-    # Strip common LLM markdown fencing
     cleaned = re.sub(r"```(?:json)?", "", text).replace("```", "").strip()
 
     # Fast path — try direct parse on the whole cleaned string first
@@ -57,7 +50,6 @@ def extract_json(text: str) -> dict | list:
     except json.JSONDecodeError:
         pass
 
-    # FIX 8: bracket-counting approach instead of greedy regex
     boundaries = _find_json_boundaries(cleaned)
     if boundaries:
         start, end = boundaries

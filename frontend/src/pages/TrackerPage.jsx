@@ -18,15 +18,6 @@ export default function Dashboard() {
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState('')
 
-  /* Fetch session if not passed via navigation state */
-  useEffect(() => {
-    if (location.state) {
-      setSession(location.state)
-      setLoading(false)
-    }
-    fetchProgress()
-  }, [sessionId]) // eslint-disable-line
-
   const fetchSession = useCallback(async () => {
     try {
       const data = await getPrep(sessionId)
@@ -47,9 +38,28 @@ export default function Dashboard() {
     }
   }, [sessionId])
 
+  /* Fetch session if not passed via navigation state */
   useEffect(() => {
-    if (!location.state) fetchSession()
-  }, [fetchSession, location.state])
+    if (!sessionId) {
+      const savedSession = localStorage.getItem('prep_session_id')
+      if (savedSession) {
+        navigate(`/dashboard/${savedSession}`, { replace: true })
+      } else {
+        navigate('/')
+      }
+      return
+    }
+
+    if (location.state) {
+      setSession(location.state)
+      setLoading(false)
+    }
+    fetchProgress()
+  }, [sessionId, location.state, navigate, fetchProgress])
+
+  useEffect(() => {
+    if (!location.state && sessionId) fetchSession()
+  }, [fetchSession, location.state, sessionId])
 
   /* Toggle a topic checkbox */
   const handleToggle = async (topic) => {

@@ -1,17 +1,10 @@
 """
 graph/state.py — PrepState is the shared memory of the entire pipeline.
 
-FIX 5 (revised): ALL keys carry a `last_wins` reducer.
-Reason: agents that run in parallel branches both return {**state, "their_key": ...},
-which means LangGraph sees concurrent writes to every key in the state dict —
-not just the one that changed.  Without a reducer on ALL keys, LangGraph 1.1.x
-raises InvalidUpdateError("Can receive only one value per step") for any key
-touched by more than one concurrent writer.
-
-The `last_wins` reducer (return b if b is not None else a) is safe here because:
-  - Sequential nodes overwrite their key: clean, no conflict.
-  - Parallel nodes (schedule / patterns) each only change one key but carry all
-    others unchanged; last_wins keeps the first non-None value either way.
+All keys carry a `last_wins` reducer because agents in parallel branches return
+{**state, "their_key": ...}, which makes LangGraph see concurrent writes to every
+key in the dict. Without a reducer on ALL keys, LangGraph raises InvalidUpdateError
+for any key touched by more than one concurrent writer.
 """
 from typing import Annotated, Optional, TypedDict
 
@@ -28,7 +21,7 @@ class PrepState(TypedDict):
     timeline_days: Annotated[int,            last_wins]
     intel:         Annotated[Optional[dict], last_wins]
     curriculum:    Annotated[Optional[dict], last_wins]
-    # Written by parallel branches — reducer is critical here
+    # Written by parallel branches — reducer prevents InvalidUpdateError
     schedule:      Annotated[Optional[dict], last_wins]
     patterns:      Annotated[Optional[dict], last_wins]
     html_output:   Annotated[Optional[str],  last_wins]

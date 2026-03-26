@@ -1,15 +1,12 @@
 """
-graph/runner.py — Entry point to run the prep pipeline.
-
-FIX 9: After ainvoke, validate that html_output is present; raise a descriptive
-        RuntimeError rather than letting the router trip over a None value.
+graph/runner.py — Entry point to invoke the prep pipeline.
 """
 import re
 from backend.src.graph.state import PrepState
 
 
 def parse_query(query: str) -> tuple[str, str, int]:
-    """Public alias — extracts (company, role, days) from a free-text query."""
+    """Extract (company, role, days) from a free-text query."""
     days_match = re.search(r"(\d+)\s*day", query, re.IGNORECASE)
     days = int(days_match.group(1)) if days_match else 7
     role_pattern = r"(AI Engineer|Backend Engineer|Software Engineer|SDE|Data Scientist|ML Engineer|Full Stack)"
@@ -20,7 +17,7 @@ def parse_query(query: str) -> tuple[str, str, int]:
     return company, role, days
 
 
-# Keep old private name as an alias for internal callers
+# Alias for internal callers
 _parse_query = parse_query
 
 
@@ -37,12 +34,12 @@ async def run_prep(query: str) -> PrepState:
     }
     final_state = await prep_graph.ainvoke(initial_state)
 
-    # FIX 9: validate critical keys before returning to the router
+    # Validate critical keys are populated before returning to the router
     missing = [k for k in ("html_output", "session_id", "company", "role") if not final_state.get(k)]
     if missing:
         raise RuntimeError(
-            f"Pipeline completed but the following required keys are missing or None "
-            f"in final_state: {missing}.  Check agent logs above for the root cause."
+            f"Pipeline completed but required keys are missing: {missing}. "
+            f"Check agent logs for the root cause."
         )
 
     return final_state

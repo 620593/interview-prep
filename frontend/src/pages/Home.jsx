@@ -22,6 +22,7 @@ export default function Home() {
     setError('')
     try {
       const data = await generatePrep(query.trim())
+      localStorage.setItem('prep_session_id', data.session_id)
       navigate(`/dashboard/${data.session_id}`, { state: data })
     } catch (err) {
       const msg = err?.response?.data?.detail || err.message || 'Something went wrong. Please try again.'
