@@ -20,7 +20,7 @@ app = FastAPI(title="Interview Prep Agent", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://your-vercel-app.vercel.app"],
+    allow_origins=["*"],  # Allow any frontend domain (Vercel, Render, local)
     allow_methods=["*"],
     allow_headers=["*"],
 )
