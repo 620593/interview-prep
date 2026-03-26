@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ company }} Interview Prep — {{ timeline_days }} Days</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --card: #1a1a1a; --border: #2a2a2a;
+    --accent: #6366f1; --green: #22c55e; --yellow: #eab308;
+    --red: #ef4444; --text: #e5e5e5; --muted: #737373;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; padding: 2rem; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+  .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 2rem; }
+
+  /* Progress bar */
+  .progress-wrap { background: var(--border); border-radius: 99px; height: 8px; margin-bottom: 2rem; }
+  .progress-bar { background: var(--accent); height: 8px; border-radius: 99px; transition: width 0.4s; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab { padding: 0.4rem 1rem; border-radius: 6px; border: 1px solid var(--border);
+         background: var(--card); color: var(--muted); cursor: pointer; font-size: 0.85rem; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Day cards */
+  .day-panel { display: none; }
+  .day-panel.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+          padding: 1.25rem; margin-bottom: 1rem; }
+  .card h3 { font-size: 1rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+  .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; }
+  .badge.critical { background: #3f1f1f; color: var(--red); }
+  .badge.high { background: #3f2f0f; color: var(--yellow); }
+  .badge.medium { background: #1f2f1f; color: var(--green); }
+
+  /* Problem checklist */
+  .problem-list { list-style: none; }
+  .problem-list li { display: flex; align-items: center; gap: 0.75rem;
+                     padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  .problem-list li:last-child { border-bottom: none; }
+  .problem-list li.done { text-decoration: line-through; color: var(--muted); }
+  input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+  .diff { font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; }
+  .diff.easy   { background: #1f3f1f; color: var(--green); }
+  .diff.medium { background: #3f2f0f; color: var(--yellow); }
+  .diff.hard   { background: #3f1f1f; color: var(--red); }
+
+  /* Schedule timeline */
+  .slot { display: flex; gap: 1rem; padding: 0.4rem 0; font-size: 0.85rem; align-items: flex-start; }
+  .slot-time { color: var(--muted); min-width: 70px; }
+  .slot-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .slot-dot.learn  { background: var(--accent); }
+  .slot-dot.solve  { background: var(--green); }
+  .slot-dot.review { background: var(--yellow); }
+  .slot-dot.break  { background: var(--muted); }
+  .slot-dot.mock   { background: var(--red); }
+
+  /* Pattern cards */
+  pre { background: #111; border: 1px solid var(--border); border-radius: 6px;
+        padding: 1rem; font-size: 0.8rem; overflow-x: auto; white-space: pre-wrap; color: #a5f3fc; }
+  .insight { background: #1a1f2e; border-left: 3px solid var(--accent);
+             padding: 0.6rem 0.8rem; margin: 0.75rem 0; font-size: 0.85rem; border-radius: 0 6px 6px 0; }
+  .tip { background: #1f2a1f; border-left: 3px solid var(--green);
+         padding: 0.6rem 0.8rem; margin: 0.5rem 0; font-size: 0.85rem; border-radius: 0 6px 6px 0; }
+</style>
+</head>
+<body>
+
+<h1>{{ company }} — {{ role }} Interview Prep</h1>
+<p class="meta">{{ timeline_days }}-day plan · {{ intel.overall_difficulty | capitalize }} difficulty · Top topics: {{ intel.top_topics | join(', ') }}</p>
+
+<!-- Global progress bar -->
+<div class="progress-wrap">
+  <div class="progress-bar" id="global-bar" style="width:0%"></div>
+</div>
+
+<!-- Tabs: one per day + Schedule + Patterns -->
+<div class="tabs">
+  {% for day in curriculum.days %}
+  <button class="tab {% if loop.first %}active{% endif %}" onclick="showTab('day-{{ day.day }}', this)">
+    Day {{ day.day }}
+  </button>
+  {% endfor %}
+  <button class="tab" onclick="showTab('schedule', this)">📅 Schedule</button>
+  <button class="tab" onclick="showTab('patterns', this)">🧩 Patterns</button>
+</div>
+
+<!-- Day panels -->
+{% for day in curriculum.days %}
+<div id="day-{{ day.day }}" class="day-panel {% if loop.first %}active{% endif %}">
+  <div class="card">
+    <h3>
+      {{ day.topic }}
+      <span class="badge {{ day.priority }}">{{ day.priority }}</span>
+    </h3>
+    <p style="color:var(--muted); font-size:0.85rem; margin-bottom:1rem">{{ day.goal }}</p>
+    <ul class="problem-list">
+      {% for p in day.problems %}
+      <li id="p-{{ day.day }}-{{ loop.index0 }}">
+        <input type="checkbox"
+               data-day="{{ day.day }}"
+               data-idx="{{ loop.index0 }}"
+               onchange="toggleProblem(this)">
+        <span>{{ p.name }}</span>
+        <span class="diff {{ p.difficulty }}">{{ p.difficulty }}</span>
+        <span style="color:var(--muted); font-size:0.75rem">{{ p.pattern }}</span>
+        {% if p.type == 'backup' %}
+        <span style="color:var(--muted); font-size:0.75rem">(backup)</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endfor %}
+
+<!-- Schedule panel -->
+<div id="schedule" class="day-panel">
+  {% for day in schedule.schedule %}
+  <div class="card">
+    <h3>Day {{ day.day }} — {{ day.theme }}</h3>
+    {% for slot in day.slots %}
+    <div class="slot">
+      <span class="slot-time">{{ slot.time }}</span>
+      <div class="slot-dot {{ slot.type }}"></div>
+      <div>
+        <strong>{{ slot.activity }}</strong>
+        <span style="color:var(--muted)"> · {{ slot.detail }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Patterns panel -->
+<div id="patterns" class="day-panel">
+  {% for p in patterns.patterns %}
+  <div class="card">
+    <h3>{{ p.topic }}
+      <span style="color:var(--muted); font-size:0.8rem">{{ p.time_complexity }}</span>
+    </h3>
+    <div class="insight">💡 {{ p.key_insight }}</div>
+    <div class="tip">🎯 {{ p.company_tip }}</div>
+    <pre>{{ p.template }}</pre>
+    {% if p.common_mistakes %}
+    <p style="font-size:0.8rem; color:var(--muted); margin-top:0.5rem">
+      ⚠️ Common mistakes: {{ p.common_mistakes | join(' · ') }}
+    </p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  // ── Tab navigation ──────────────────────────────────────────────
+  function showTab(id, btn) {
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Progress persistence via localStorage ──────────────────────
+  const SESSION_KEY = 'prep_{{ session_id }}';
+
+  function loadProgress() {
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+    Object.entries(saved).forEach(([key, done]) => {
+      const cb = document.querySelector(`input[data-day="${key.split('-')[0]}"][data-idx="${key.split('-')[1]}"]`);
+      if (cb && done) {
+        cb.checked = true;
+        cb.closest('li').classList.add('done');
+      }
+    });
+    updateBar();
+  }
+
+  function toggleProblem(cb) {
+    cb.closest('li').classList.toggle('done', cb.checked);
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+    saved[`${cb.dataset.day}-${cb.dataset.idx}`] = cb.checked;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(saved));
+    updateBar();
+  }
+
+  function updateBar() {
+    const all = document.querySelectorAll('.problem-list input[type="checkbox"]');
+    const done = [...all].filter(c => c.checked).length;
+    document.getElementById('global-bar').style.width = `${(done / all.length * 100).toFixed(1)}%`;
+  }
+
+  loadProgress();
+</script>
+</body>
+</html>

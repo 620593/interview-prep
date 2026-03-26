@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+langgraph
+langchain-groq
+langchain-community
+tavily-python
+motor
+jinja2
+python-dotenv
+httpx
+apscheduler

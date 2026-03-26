@@ -1,0 +1,1 @@
+// Query input component

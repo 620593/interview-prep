@@ -1,0 +1,1 @@
+// Generation status component
